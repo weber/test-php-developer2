@@ -20,3 +20,6 @@ psy/*
 public/.html.hash
 *.hash
 public/bundle/*
+/vendor/
+/logs/*
+!/logs/README.md

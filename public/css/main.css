@@ -1,0 +1,58 @@
+*{margin: 0; padding: 0;}
+
+html, body{
+    font-size: 10px;
+}
+.b-form_shortener{
+    border: 1px solid #c6c6c6;
+    width: 46.4rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 2rem;
+}
+.b-form_shortener__item{
+    float: left;
+}
+.b-result{
+
+}
+.b-result a{
+    margin: 2rem;
+    display: inline-block;
+    font-size: 1.4rem;
+    color: #dd4444;
+}
+.b-form__button{
+    padding: 0.5rem;
+    width: 15rem;
+}
+.b-form__input{
+    padding: 0.5rem;
+    width: 30rem;
+}
+
+/*clearfix Olsen*/
+.clearfix:after{
+    content:".";
+    display:block;
+    height:0;
+    clear:both;
+    visibility:hidden;
+}
+
+.clearfix{
+    display:inline-block;
+}
+
+/**//*\*/
+* html .clearfix{
+    height:1%;
+}
+.clearfix{
+    display:block;
+}
+
+/**/
+/*end clearfix*/

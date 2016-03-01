@@ -16,3 +16,14 @@
 Использование CMS фреймворка Yii, Yii2, Laravel, etc.;
 
 На стороне клиента можно использовать любой фреймворк.
+
+
+# Зависимости
+- php 5
+- sqlite
+- Slim microframework
+
+# Запуск 
+```   
+php -S 0.0.0.0:8080 -t public public/index.php
+```
