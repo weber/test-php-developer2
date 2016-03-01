@@ -28,12 +28,12 @@ var ShortedView = Backbone.View.extend({
     },
     initialize: function () {
         this.model_shorted = model_shorted;
-        this.model_shorted.on('reset', this.render, this);
+        this.model_shorted.on('change', this.render, this);
     },
     validate: function (e) {
         var url = $(e.currentTarget).val();
         var button = $( ".js-short" );
-        var pattern = /^http:\/\/([0-9a-zA-Z\-\_\.]){2,}/i;
+        var pattern = /^(http|https):\/\/([0-9a-zA-Z\-\_\.]){2,}/i;
         if (pattern.test(url)) {
             button.prop( "disabled", false );
         } else {
@@ -51,8 +51,14 @@ var ShortedView = Backbone.View.extend({
     },
     render: function () {
         var el_container = $('.on-url_shortened');
+        var short_link = this.model_shorted.toJSON().result;
+        var tag_link = _.template('<a target="_blank" href="<%- url %>"><%- url %></a>');
+
         el_container.empty();
-        el_container.html(this.model_shorted.toJSON().link_short);
+        el_container.html(tag_link({url : short_link}));
     }
 });
 var view_shorted = new ShortedView();
+
+Backbone.emulateHTTP = true
+Backbone.emulateJSON = true

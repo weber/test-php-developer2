@@ -1,6 +1,8 @@
 <?php
 return [
     'settings' => [
+        'hostname' => 'localhost',
+        'protocol' => 'http',
         'displayErrorDetails' => true, // set to false in production
 
         // Renderer settings

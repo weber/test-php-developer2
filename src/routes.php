@@ -1,57 +1,93 @@
 <?php
 // Routes
 
-$app->get('/init', function ($req, $res, $args) {
+$app->get('/', function ($req, $res, $args) {
 
-    $this->db->exec("CREATE TABLE IF NOT EXISTS shortener (
-                    id INTEGER PRIMARY KEY,
-                    url TEXT,
-                    short_url VARCHAR(10),
-                    time INTEGER)");
+    createDB($this);
 
-    return $this->renderer->render($res, 'index.phtml', $args);
-});
-$app->get('/', function ($request, $response, $args) {
-
-    $insert = "INSERT INTO messages (title, message, time)
-                VALUES (:title, :message, :time)";
-
-
-    /*foreach ($messages as $m) {
-        // Set values to bound variables
-        $title = $m['title'];
-        $message = $m['message'];
-        $time = $m['time'];
-
-        // Bind parameters to statement variables
-        $stmt = $this->db->prepare($insert);
-        $stmt->bindParam(':title', $title);
-        $stmt->bindParam(':message', $message);
-        $stmt->bindParam(':time', $time);
-        var_dump('ok');
-        // Execute statement
-        $stmt->execute();
-    }
-
-    $sql='select * from messages';
-    foreach ($this->db->query($sql) as $row) {
-        print_r($row);
-    }*/
-
-
-    // Render index view
-   // return $this->renderer->render($response, 'index.phtml', $args);
-    return $this->view->render($response, 'index.phtml', [
+    return $this->view->render($res, 'index.phtml', [
         'name' => 'hello'//$args['name']
     ]);
-});//->setName('profile');
+});
+
+$app->get('/{hash}', function ($req, $res, $arg) {
+
+    $url = getOriginalLinkByHash($this, $arg['hash']);
+    return $res->withHeader('Location', $url);
+});
 
 $app->get('/api/shorted', function ($req, $res, $args) {
 
-    $data = ['link_short' => 'http://localhost/sdrefv3345'];
+    $params = $req->getQueryParams();
+    $url_short = substr(md5($params['link_original'].time()), 0, 10);
 
+    setHashDB($this, $params['link_original'], $url_short);
+    $link = $this->settings->get('protocol') . '://' . getHname($this->settings->get('hostname')) . '/' .$url_short;
+
+    $data = ['result' =>  $link];
     $body = $res->getBody();
     $body->write(json_encode($data));
     return $res->withHeader('Content-Type', 'application/json')->withBody($body);
-
 });
+
+
+
+/**
+ * Возвращает оригинальную ссылку по хешу(короткой ссылке)
+ * @param $this
+ * @param $short_url
+ *
+ * @return mixed
+ */
+function getOriginalLinkByHash($this, $short_url) {
+    $sql='SELECT url FROM shortener WHERE short_url= :short_url';
+
+    $db = $this['db']->prepare($sql);
+    $db->execute([':short_url' => $short_url]);
+    $result = $db->fetch(PDO::FETCH_ASSOC);
+    return $result['url'];
+}
+
+/**
+ * Создает  sqlite базу
+ * @param $this
+ */
+function createDB($this) {
+
+    $this['db']->exec("
+        CREATE TABLE IF NOT EXISTS shortener (
+            id INTEGER PRIMARY KEY,
+            url TEXT,
+            short_url VARCHAR(10)
+        )
+        ");
+}
+
+/**
+ * Сохраняет хеш урала (короткий урл)
+ * @param $this
+ * @param $url
+ * @param $short_url
+ */
+function setHashDB($this, $url, $short_url) {
+    $sql = "INSERT INTO shortener (url, short_url) VALUES (:url, :short_url)";
+
+    $db = $this['db']->prepare($sql);
+    $db->bindParam(':url', $url);
+    $db->bindParam(':short_url', $short_url);
+    $db->execute();
+}
+
+/**
+ * Возваращает имя хоста с портом если он не стандартный
+ * @param $hostname
+ *
+ * @return string
+ */
+function getHname ($hostname){
+    if ($_SERVER['SERVER_PORT'] != 80) {
+        $hostname .= ':'.$_SERVER['SERVER_PORT'];
+    }
+
+    return $hostname;
+}
