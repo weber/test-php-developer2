@@ -23,3 +23,5 @@ public/bundle/*
 /vendor/
 /logs/*
 !/logs/README.md
+/cache/*
+*.sqlite3

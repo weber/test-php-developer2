@@ -19,7 +19,7 @@ $app->get('/{hash}', function ($req, $res, $arg) {
 $app->get('/api/shorted', function ($req, $res, $args) {
 
     $params = $req->getQueryParams();
-    $url_short = substr(md5($params['link_original'].time()), 0, 10);
+    $url_short = urlsafe_b64encode($params['link_original']);
 
     setHashDB($this, $params['link_original'], $url_short);
     $link = $this->settings->get('protocol') . '://' . getHname($this->settings->get('hostname')) . '/' .$url_short;
@@ -30,6 +30,22 @@ $app->get('/api/shorted', function ($req, $res, $args) {
     return $res->withHeader('Content-Type', 'application/json')->withBody($body);
 });
 
+function urlsafe_b64encode($string)
+{
+    $hash = '';
+    $codeset = "-=+{}[]$@!?23456789abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ";
+    $data = base64_encode($string);
+    $data = str_replace(array('+','/','='),array('-','_','.'), $data);
+    $base = strlen($codeset);
+    $n = base_convert(str_pad($data, 7, "0", STR_PAD_LEFT), 16, 10);
+
+    while ($n > 0) {
+        $hash = substr($codeset, bcmod($n, $base), 1) . $hash;
+        $n = bcmul(bcdiv($n, $base), '2', 0);
+    }
+
+    return $hash ;
+}
 
 
 /**
